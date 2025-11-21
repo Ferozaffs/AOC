@@ -1,0 +1,19 @@
+package day12
+
+import (
+	"testing"
+)
+
+func TestSample2(t *testing.T) {
+	sampleData := `???.### 1,1,3
+	.??..??...?##. 1,1,3
+	?#?#?#?#?#?#?#? 1,3,1,6
+	????.#...#... 4,1,1
+	????.######..#####. 1,6,5
+	?###???????? 3,2,1`
+
+	ans := Solve(sampleData, 5)
+	if ans != 525152 {
+		t.Fatalf("Mismatch! Expected 525152 got %d", ans)
+	}
+}
