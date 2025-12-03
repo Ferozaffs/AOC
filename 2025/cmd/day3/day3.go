@@ -3,8 +3,9 @@ package day3
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
-	"sort"
+	"slices"
 	"strings"
 
 	"2025/cmd"
@@ -54,86 +55,47 @@ func Solve(data string) (int, int) {
 
 	for _, bank := range banks {
 
-		batteryPair := map[int]int{}
-		batteryArray := map[int]int{}
+		batteryPair := []int{}
+		batteryArray := []int{}
+
+		breakPointIndex := -1
 
 		for compare := 9; compare >= 0; compare-- {
-
-			lowestPairIndex := -1
-			seekValue := 10
-			for idx, value := range batteryPair {
-				if lowestPairIndex == -1 {
-					lowestPairIndex = idx
-				} else if idx < lowestPairIndex || value < seekValue {
-					lowestPairIndex = idx
-					seekValue = value
-				}
-			}
-
-			lowestArrayIndex := -1
-			seekValue = 10
-			for idx, value := range batteryArray {
-				if lowestArrayIndex == -1 {
-					lowestArrayIndex = idx
-				} else if idx < lowestArrayIndex || value < seekValue {
-					lowestArrayIndex = idx
-					seekValue = value
-				}
-			}
-
-			for index := len(bank) - 1; index >= 0; index-- {
-				value := bank[index]
+			for index, value := range bank {
 				if value == compare {
-					if len(batteryPair) < 2 && (lowestPairIndex > len(bank)-3-len(batteryPair) || index > lowestPairIndex) {
-						_, ok := batteryPair[index]
-						if ok == false {
-							batteryPair[index] = value
-						}
-					}
-					if len(batteryArray) < 12 && (lowestArrayIndex > len(bank)-13-len(batteryArray) || index > lowestArrayIndex) {
-						_, ok := batteryArray[index]
-						if ok == false {
-							batteryArray[index] = value
-						}
+					if len(batteryPair) < 2 && index+1-len(batteryPair) < len(bank) && index > breakPointIndex {
+						breakPointIndex = index
+						batteryPair = append(batteryPair, value)
+						compare = 10
+						break
 					}
 				}
 			}
 		}
 
-		index0 := -1
-		index1 := -1
-		for idx := range batteryPair {
-			if index0 != -1 {
-				index1 = idx
-			} else {
-				index0 = idx
+		breakPointIndex = -1
+		for compare := 9; compare >= 0; compare-- {
+			for index, value := range bank {
+				if value == compare {
+					if len(batteryArray) < 12 && index+11-len(batteryArray) < len(bank) && index > breakPointIndex {
+						breakPointIndex = index
+						batteryArray = append(batteryArray, value)
+						compare = 10
+						break
+					}
+				}
 			}
 		}
 
-		if index0 < index1 {
-			ans1 += batteryPair[index0]*10 + batteryPair[index1]
-		} else {
-			ans1 += batteryPair[index1]*10 + batteryPair[index0]
+		slices.Reverse(batteryPair)
+		slices.Reverse(batteryArray)
+
+		for i, value := range batteryPair {
+			ans1 += value * int(math.Pow(10.0, float64(i)))
 		}
-
-		index := make([]int, 0, len(batteryArray))
-		for idx := range batteryArray {
-			index = append(index, idx)
+		for i, value := range batteryArray {
+			ans2 += value * int(math.Pow(10.0, float64(i)))
 		}
-
-		sort.Ints(index)
-
-		value := 0
-		count := 1
-		for i := len(index) - 1; i >= 0; i-- {
-			idx := index[i]
-
-			value += batteryArray[idx] * count
-
-			count *= 10
-		}
-
-		ans2 += value
 	}
 
 	return ans1, ans2
