@@ -1,12 +1,20 @@
 package day4
 
 import (
-	"2025/cmd"
+	"bufio"
 	"fmt"
 	"os"
+	"strings"
+
+	"2025/cmd"
 
 	"github.com/spf13/cobra"
 )
+
+type Coord struct {
+	x int
+	y int
+}
 
 var DayCmd = &cobra.Command{
 	Use:   "day4",
@@ -30,5 +38,60 @@ func Run1() {
 }
 
 func Solve(data string) (int, int) {
-	return 0, 0
+	rows := [][]rune{}
+
+	scanner := bufio.NewScanner(strings.NewReader(data))
+	for scanner.Scan() {
+		rows = append(rows, []rune(string(scanner.Bytes())))
+	}
+
+	ans1 := 0
+	ans2 := 0
+
+	found := true
+	firstPass := true
+	for found {
+		found = false
+
+		foundRollCoords := []Coord{}
+		for currentRow, row := range rows {
+			for currentColumn, roll := range row {
+				if roll == '@' {
+					adjacent := 0
+
+					for x := -1; x <= 1; x++ {
+						for y := -1; y <= 1; y++ {
+							if x != 0 || y != 0 {
+								deltaRow := currentRow + x
+								deltaColumn := currentColumn + y
+
+								if deltaRow >= 0 && deltaColumn >= 0 && deltaRow < len(rows) && deltaColumn < len(row) {
+									if rows[deltaRow][deltaColumn] == '@' {
+										adjacent++
+									}
+								}
+							}
+						}
+					}
+
+					if adjacent < 4 {
+						if firstPass {
+							ans1++
+						}
+						ans2++
+
+						foundRollCoords = append(foundRollCoords, Coord{x: currentRow, y: currentColumn})
+						found = true
+					}
+				}
+			}
+		}
+		for _, coord := range foundRollCoords {
+			rows[coord.x][coord.y] = '.'
+		}
+
+		firstPass = false
+	}
+
+	return ans1, ans2
 }
